@@ -1,0 +1,176 @@
+---
+// The desk lamp: a warm pool of light that switches on once, then follows the cursor.
+// The switch in the nav turns it off and on; the choice is kept in localStorage ('nd-lamp').
+---
+
+<div class="lamp" aria-hidden="true" transition:persist="lamp">
+  <div class="lamp__night"></div>
+  <div class="lamp__glow"></div>
+</div>
+
+<style>
+  .lamp {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .lamp__glow {
+    --size: 1100px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(243 221 176 / 0.16),
+      rgb(243 221 176 / 0.07) 45%,
+      rgb(243 221 176 / 0) 100%
+    );
+    /* Start where the lamp sits in the photo: upper left */
+    transform: translate3d(calc(18vw - var(--size) / 2), calc(22vh - var(--size) / 2), 0);
+    opacity: 0;
+    animation: switch-on 1200ms var(--ease-out) 150ms forwards;
+    will-change: transform;
+  }
+
+  /* Night: the room around the desk falls into shadow */
+  .lamp__night {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 80% at 15% 0%, rgb(10 8 7 / 0.35), rgb(10 8 7 / 0.6));
+    opacity: 0;
+    transition: opacity 700ms var(--ease-out);
+  }
+  :global(html[data-lamp='off']) .lamp__night {
+    opacity: 1;
+  }
+  :global(html[data-lamp='off']) .lamp__glow {
+    opacity: 0;
+    animation: none;
+  }
+  :global(html[data-lamp='off'].lamp-switching) .lamp__glow {
+    animation: switch-off 520ms linear forwards;
+  }
+
+  /* A filament warming up: a brief stutter, then steady light */
+  @keyframes switch-on {
+    0% { opacity: 0; }
+    12% { opacity: 0.55; }
+    18% { opacity: 0.2; }
+    30% { opacity: 0.8; }
+    100% { opacity: 1; }
+  }
+  /* ...and going out: one last flicker, then dark */
+  @keyframes switch-off {
+    0% { opacity: 1; }
+    20% { opacity: 0.25; }
+    32% { opacity: 0.7; }
+    100% { opacity: 0; }
+  }
+
+  @media (max-width: 40rem) {
+    .lamp__glow {
+      --size: 700px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lamp__glow {
+      animation: none;
+      opacity: 1;
+    }
+    .lamp__night {
+      transition: none;
+    }
+    :global(html[data-lamp='off'].lamp-switching) .lamp__glow {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const glow = document.querySelector<HTMLElement>('.lamp__glow');
+  const isOff = () => root.dataset.lamp === 'off';
+
+  const apply = (off: boolean) => {
+    if (off) root.dataset.lamp = 'off';
+    else delete root.dataset.lamp;
+    document.querySelector('[data-theme-color]')?.setAttribute('content', off ? '#15110f' : '#241c17');
+    document.querySelectorAll('[data-lamp-switch]').forEach((b) => b.setAttribute('aria-pressed', String(!off)));
+  };
+
+  const toggle = () => {
+    const off = !isOff();
+    root.classList.add('lamp-switching');
+    apply(off);
+    if (!off && glow) {
+      // Restart the filament warm-up
+      glow.style.animation = 'none';
+      void glow.offsetWidth;
+      glow.style.animation = '';
+    }
+    try {
+      if (off) localStorage.setItem('nd-lamp', 'off');
+      else localStorage.removeItem('nd-lamp');
+    } catch {}
+  };
+
+  // The nav is re-rendered on every navigation, so listen on the document
+  document.addEventListener('click', (e) => {
+    if ((e.target as Element).closest?.('[data-lamp-switch]')) toggle();
+  });
+  // Page swaps replace <html> attributes: put the night back before paint
+  document.addEventListener('astro:after-swap', () => {
+    root.classList.remove('lamp-switching');
+    let stored = false;
+    try {
+      stored = localStorage.getItem('nd-lamp') === 'off';
+    } catch {}
+    apply(stored);
+  });
+  apply(isOff());
+
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (glow && fine.matches && !reduced.matches) {
+    const size = () => glow.offsetWidth;
+    let x = window.innerWidth * 0.18;
+    let y = window.innerHeight * 0.22;
+    let tx = x;
+    let ty = y;
+    let running = false;
+
+    const tick = () => {
+      // Exponential smoothing: the light trails the hand like a lamp head swinging
+      x += (tx - x) * 0.08;
+      y += (ty - y) * 0.08;
+      const s = size() / 2;
+      glow.style.transform = `translate3d(${x - s}px, ${y - s}px, 0)`;
+      if (Math.abs(tx - x) > 0.4 || Math.abs(ty - y) > 0.4) {
+        requestAnimationFrame(tick);
+      } else {
+        running = false;
+      }
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        if (isOff()) return;
+        tx = e.clientX;
+        ty = e.clientY;
+        if (!running) {
+          running = true;
+          requestAnimationFrame(tick);
+        }
+      },
+      { passive: true },
+    );
+  }
+</script>

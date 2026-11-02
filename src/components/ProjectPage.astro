@@ -1,0 +1,262 @@
+---
+import Base from '../layouts/Base.astro';
+import Laptop from './Laptop.astro';
+import { useT, routes, type Lang } from '../i18n/ui';
+import { projects } from '../data/projects';
+
+interface Props {
+  slug: string;
+  lang: Lang;
+}
+
+const { slug, lang } = Astro.props;
+const t = useT(lang);
+const index = projects.findIndex((p) => p.slug === slug);
+const p = projects[index];
+const next = projects[(index + 1) % projects.length];
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const backHref = `${routes.home[lang]}#proyectos`;
+---
+
+<Base lang={lang} alternate={routes.project(other, p.slug)} title={p.name} description={p.summary[lang]}>
+  <article class="case wrap">
+    <a class="case__back" href={backHref}>
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16 10H4m0 0 5-5m-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      {t('projects.back')}
+    </a>
+
+    <header class="case__head">
+      <h1 class="case__title" transition:name={`title-${p.slug}`}>{p.name}</h1>
+      {p.thesis && <p class="case__kind">{t('projects.thesis')}</p>}
+      <p class="case__summary">{p.summary[lang]}</p>
+      <div class="case__actions">
+        {
+          p.demo ? (
+            <a class="btn btn--brass" href={p.demo} target="_blank" rel="noopener">
+              {t('projects.demo')}
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 13 14 6m0 0H8.5M14 6v5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          ) : (
+            <span class="case__muted">{t('projects.noDemo')}</span>
+          )
+        }
+        {
+          p.repoPrivate ? (
+            <span class="case__muted">{t('projects.private')}</span>
+          ) : (
+            <a class="btn btn--ghost" href={p.repo} target="_blank" rel="noopener">{t('projects.code')}</a>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="case__screen">
+      <Laptop src={p.image} alt={p.imageAlt[lang]} name={`shot-${p.slug}`} eager />
+    </div>
+
+    <div class="case__body">
+      <div class="case__prose">
+        {p.description[lang].map((para) => <p>{para}</p>)}
+      </div>
+      <aside class="case__aside">
+        <h2 class="case__subtitle">{t('projects.highlights')}</h2>
+        <ul class="case__list">
+          {p.highlights[lang].map((h) => <li>{h}</li>)}
+        </ul>
+        <h2 class="case__subtitle">{t('projects.stack')}</h2>
+        <p class="stack">{p.stack.map((s) => <span>{s}</span>)}</p>
+      </aside>
+    </div>
+
+    {
+      p.gallery && (
+        <section class="gallery" aria-labelledby="gallery-title">
+          <h2 id="gallery-title" class="case__subtitle">{t('projects.gallery')}</h2>
+          {p.gallery.map((g) => (
+            <figure class="gallery__item reveal">
+              <img src={g.src} alt={g.alt[lang]} width="1440" height={g.height} loading="lazy" decoding="async" />
+            </figure>
+          ))}
+        </section>
+      )
+    }
+
+    <nav class="next" aria-label={t('projects.next')}>
+      <a class="next__link" href={routes.project(lang, next.slug)}>
+        <span class="next__label">{t('projects.next')}</span>
+        <span class="next__name">{next.name}</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .case {
+    padding-block: var(--space-l) var(--space-2xl);
+  }
+  .case__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--papel-suave);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 200ms ease;
+  }
+  .case__back svg {
+    width: 1.1rem;
+    transition: transform 200ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .case__back:hover {
+      color: var(--papel);
+    }
+    .case__back:hover svg {
+      transform: translateX(-3px);
+    }
+  }
+
+  .case__head {
+    max-width: 50rem;
+    margin-top: var(--space-xl);
+  }
+  .case__kind {
+    margin-top: var(--space-s);
+    color: var(--hoja);
+    font-weight: 600;
+  }
+  .case__title {
+    font-size: var(--step-4);
+    font-weight: 640;
+    letter-spacing: -0.008em;
+    font-variation-settings: 'wdth' 84;
+    width: fit-content;
+  }
+  .case__summary {
+    margin-top: var(--space-m);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--papel-suave);
+  }
+  .case__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    margin-top: var(--space-l);
+  }
+  .case__muted {
+    color: var(--papel-tenue);
+  }
+
+  .case__screen {
+    margin-top: var(--space-xl);
+    padding-inline: clamp(0rem, 4vw, 4rem);
+  }
+
+  .case__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    margin-top: var(--space-xl);
+  }
+  .case__prose {
+    display: grid;
+    align-content: start;
+    gap: var(--space-m);
+    max-width: 62ch;
+    font-size: 1.125rem;
+  }
+  .case__prose p:first-child {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+  .case__aside {
+    display: grid;
+    align-content: start;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border-radius: var(--radius-m);
+    background: rgb(23 21 19 / 0.6);
+    box-shadow: inset 0 0 0 1px var(--grafito-borde);
+  }
+  .case__subtitle {
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .case__aside .case__subtitle + * {
+    margin-bottom: var(--space-s);
+  }
+  .case__list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--papel-suave);
+  }
+  .case__list li {
+    position: relative;
+    padding-left: 1.3rem;
+  }
+  .case__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 0.65rem;
+    height: 1px;
+    background: var(--laton);
+  }
+
+  .gallery {
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-2xl);
+  }
+  .gallery__item {
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius-m);
+    box-shadow:
+      0 0 0 1px var(--grafito-borde),
+      0 40px 70px -40px rgb(0 0 0 / 0.9);
+  }
+  .gallery__item img {
+    width: 100%;
+    height: auto;
+  }
+
+  .next {
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--grafito-borde);
+  }
+  .next__link {
+    display: grid;
+    gap: 0.3rem;
+    padding-top: var(--space-l);
+    text-decoration: none;
+  }
+  .next__label {
+    color: var(--papel-tenue);
+  }
+  .next__name {
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    font-variation-settings: 'wdth' 85;
+    transition: color 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .next__link:hover .next__name {
+      color: var(--laton-claro);
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .case__body {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

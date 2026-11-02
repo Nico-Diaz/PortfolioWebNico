@@ -1,0 +1,116 @@
+---
+import { useT, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const t = useT(Astro.props.lang);
+const facts = [
+  { term: t('about.facts.focus'), value: t('about.facts.focusValue') },
+  { term: t('about.facts.stack'), value: t('about.facts.stackValue') },
+  { term: t('about.facts.where'), value: t('about.facts.whereValue') },
+];
+---
+
+<section id="sobre-mi" class="section about" aria-labelledby="about-title">
+  <div class="wrap about__grid">
+    <div class="about__text">
+      <h2 id="about-title" class="section__title">{t('about.title')}</h2>
+      <div class="about__body">
+        <p class="about__first">{t('about.p1')}</p>
+        <p>{t('about.p2')}</p>
+        <p>{t('about.p3')}</p>
+      </div>
+      <dl class="facts">
+        {
+          facts.map((f) => (
+            <div class="facts__row">
+              <dt>{f.term}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <figure class="desk">
+      <img
+        class="desk__photo reveal"
+        src="/img/escritorio.jpg"
+        alt={t('about.photo')}
+        width="736"
+        height="1104"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  </div>
+</section>
+
+<style>
+  .about__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  .about__body {
+    display: grid;
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+    max-width: 62ch;
+    color: var(--papel-suave);
+  }
+  .about__first {
+    color: var(--papel);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .facts {
+    display: grid;
+    margin: var(--space-l) 0 0;
+    max-width: 62ch;
+    border-top: 1px solid var(--grafito-borde);
+  }
+  .facts__row {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: var(--space-s);
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--grafito-borde);
+  }
+  .facts dt {
+    color: var(--papel-tenue);
+  }
+  .facts dd {
+    margin: 0;
+  }
+
+  .desk {
+    margin: 0;
+    position: sticky;
+    top: 6rem;
+  }
+  .desk__photo {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-m);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.8);
+  }
+
+  @media (max-width: 52rem) {
+    .about__grid {
+      grid-template-columns: 1fr;
+    }
+    .desk {
+      position: static;
+      max-width: 24rem;
+    }
+    .facts__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

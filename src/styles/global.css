@@ -1,0 +1,273 @@
+/* Escritorio al atardecer: every colour is sampled from the reference desk photo. */
+:root {
+  --nogal: #241c17;
+  --nogal-alto: #2f251f;
+  --grafito: #171513;
+  --grafito-borde: #34302b;
+  --laton: #c29b60;
+  --laton-claro: #d9b77f;
+  --luz: #f3ddb0;
+  --hoja: #7d9a5a;
+  --papel: #ece6da;
+  --papel-suave: #b8ad9c;
+  --papel-tenue: #9a907f;
+
+  --font: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale: perfect fourth from 1.0625rem body */
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.375rem;
+  --step-2: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2.2rem, 1.6rem + 2.4vw, 3.4rem);
+  --step-4: clamp(3.2rem, 2rem + 5vw, 6rem);
+
+  --space-xs: 0.5rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.5rem;
+  --space-xl: clamp(4rem, 3rem + 4vw, 7rem);
+  --space-2xl: clamp(6rem, 4rem + 8vw, 11rem);
+
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  --max: 76rem;
+
+  --radius-s: 6px;
+  --radius-m: 14px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: dark;
+}
+
+/* Lamp off: night falls on the desk. Brass goes matte, the wood sinks into shadow. */
+html[data-lamp='off'] {
+  --nogal: #15110f;
+  --nogal-alto: #1c1714;
+  --laton: #a4895c;
+  --laton-claro: #bba477;
+  --papel-suave: #aba292;
+  --papel-tenue: #8f8676;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  scrollbar-color: var(--grafito-borde) var(--nogal);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--nogal);
+  /* Dusk: the room darkens away from the lamp */
+  background-image: radial-gradient(120% 80% at 15% 0%, #2c221c 0%, var(--nogal) 55%, #1d1713 100%);
+  background-attachment: fixed;
+  color: var(--papel);
+  transition: background-color 600ms var(--ease-out);
+  font-family: var(--font);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--laton);
+  color: var(--grafito);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, var(--laton) 70%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--laton-claro);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.wrap {
+  width: min(100% - 2 * var(--gutter), var(--max));
+  margin-inline: auto;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--papel);
+  color: var(--grafito);
+  border-radius: var(--radius-s);
+  transform: translateY(-160%);
+  transition: transform 200ms var(--ease-out);
+}
+.skip:focus-visible {
+  transform: none;
+}
+
+/* Section rhythm: more air above a heading than below */
+.section {
+  position: relative;
+  padding-block: var(--space-2xl) 0;
+}
+.section__head {
+  display: grid;
+  gap: var(--space-s);
+  margin-bottom: var(--space-l);
+  max-width: 40rem;
+}
+.section__title {
+  font-size: var(--step-3);
+  font-variation-settings: 'wdth' 88;
+}
+.section__lead {
+  color: var(--papel-suave);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+/* Buttons: brass hardware */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--step-0);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn--brass {
+  background: var(--laton);
+  color: var(--grafito);
+  box-shadow: 0 10px 30px -12px rgb(194 155 96 / 0.55);
+}
+.btn--ghost {
+  border-color: var(--grafito-borde);
+  background: rgb(23 21 19 / 0.55);
+  color: var(--papel);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--brass:hover {
+    background: var(--laton-claro);
+  }
+  .btn--ghost:hover {
+    border-color: var(--laton);
+  }
+}
+.btn svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+/* Image reveal: content is visible by default; JS opts in to the clip */
+.js .reveal {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1100ms var(--ease-in-out);
+}
+.js .reveal.is-in {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js .reveal {
+    clip-path: none;
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .js .reveal.is-in {
+    opacity: 1;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* View transitions between pages: a quick crossfade, shared elements morph */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-group(*) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease-in-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 1ms !important;
+  }
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}

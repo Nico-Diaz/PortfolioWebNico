@@ -1,0 +1,115 @@
+---
+import { useT, routes, type Lang } from '../i18n/ui';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+}
+
+const { project: p, lang } = Astro.props;
+const t = useT(lang);
+const href = routes.project(lang, p.slug);
+---
+
+<article class="item">
+  <a class="item__shot" href={href} tabindex="-1" aria-hidden="true">
+    <div class="item__frame reveal">
+      <img
+        src={p.image}
+        alt=""
+        width="1440"
+        height="900"
+        loading="lazy"
+        decoding="async"
+        transition:name={`shot-${p.slug}`}
+      />
+    </div>
+  </a>
+  <h4 class="item__title">
+    <a href={href} transition:name={`title-${p.slug}`}>{p.name}</a>
+  </h4>
+  {p.thesis && <p class="item__note">{t('projects.thesis')}</p>}
+  <p class="item__summary">{p.summary[lang]}</p>
+  <p class="stack">
+    <span class="visually-hidden">{t('projects.stack')}: </span>
+    {p.stack.map((s) => <span>{s}</span>)}
+  </p>
+  <ul class="item__links">
+    <li><a href={href}>{t('projects.viewCase')}<span class="visually-hidden">: {p.name}</span></a></li>
+    {p.demo && (
+      <li><a href={p.demo} target="_blank" rel="noopener">{t('projects.demo')}<span class="visually-hidden">: {p.name}</span></a></li>
+    )}
+    {!p.repoPrivate && (
+      <li><a href={p.repo} target="_blank" rel="noopener">GitHub<span class="visually-hidden">: {p.name}</span></a></li>
+    )}
+  </ul>
+</article>
+
+<style>
+  .item {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+  }
+  .item__shot {
+    display: block;
+    margin-bottom: 0.6rem;
+    border-radius: var(--radius-m);
+  }
+  .item__frame {
+    overflow: hidden;
+    border-radius: var(--radius-m);
+    background: var(--grafito);
+    box-shadow:
+      0 0 0 1px var(--grafito-borde),
+      0 30px 50px -30px rgb(0 0 0 / 0.9);
+  }
+  .item__frame img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+    transition: transform 700ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover .item__frame img {
+      transform: scale(1.025);
+    }
+    .item__title a:hover {
+      color: var(--laton-claro);
+    }
+  }
+  .item__title {
+    font-size: var(--step-2);
+    font-weight: 600;
+    font-variation-settings: 'wdth' 88;
+  }
+  .item__title a {
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+  .item__note {
+    color: var(--hoja);
+    font-size: var(--step--1);
+    font-weight: 600;
+    margin-top: -0.4rem;
+  }
+  .item__summary {
+    color: var(--papel-suave);
+    max-width: 52ch;
+  }
+  .item__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin: 0.3rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+  }
+  .item__links a {
+    color: var(--laton-claro);
+  }
+</style>

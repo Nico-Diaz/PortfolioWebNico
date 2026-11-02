@@ -1,0 +1,68 @@
+---
+import '@fontsource-variable/bricolage-grotesque/standard.css';
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Lamp from '../components/Lamp.astro';
+import { useT, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Path of this same page in the other language */
+  alternate: string;
+  title?: string;
+  description?: string;
+}
+
+const { lang, alternate, title, description } = Astro.props;
+const t = useT(lang);
+const pageTitle = title ? `${title} · Nico Díaz` : t('meta.title');
+const pageDescription = description ?? t('meta.description');
+const other: Lang = lang === 'es' ? 'en' : 'es';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="theme-color" content="#241c17" data-theme-color />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={lang} href={canonical} />
+    <link rel="alternate" hreflang={other} href={new URL(alternate, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={new URL('/img/perfil.jpg', Astro.site)} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
+    <ClientRouter />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        if (sessionStorage.getItem('nd-intro-done')) document.documentElement.classList.add('intro-done');
+      } catch {}
+      try {
+        if (localStorage.getItem('nd-lamp') === 'off') {
+          document.documentElement.dataset.lamp = 'off';
+          document.querySelector('[data-theme-color]')?.setAttribute('content', '#15110f');
+        }
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">{t('nav.skip')}</a>
+    <Lamp />
+    <Nav lang={lang} alternate={alternate} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import '../scripts/reveal';
+    </script>
+  </body>
+</html>

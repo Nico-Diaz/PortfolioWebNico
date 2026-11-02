@@ -1,0 +1,190 @@
+---
+import Laptop from './Laptop.astro';
+import ProjectItem from './ProjectItem.astro';
+import { useT, routes, type Lang } from '../i18n/ui';
+import { featured, landings, software } from '../data/projects';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useT(lang);
+const groups = [
+  { id: 'landings', title: t('projects.landings'), items: landings },
+  { id: 'software', title: t('projects.software'), items: software },
+];
+---
+
+<section id="proyectos" class="section" aria-labelledby="projects-title">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 id="projects-title" class="section__title">{t('projects.title')}</h2>
+      <p class="section__lead">{t('projects.lead')}</p>
+    </div>
+
+    <article class="feature" aria-labelledby="feature-title">
+      <div class="feature__screen">
+        <Laptop
+          src={featured.image}
+          alt={featured.imageAlt[lang]}
+          name={`shot-${featured.slug}`}
+        />
+      </div>
+      <div class="feature__text">
+        <h3 id="feature-title" class="feature__title" transition:name={`title-${featured.slug}`}>
+          {featured.name}
+        </h3>
+        <p class="feature__tag">{t('projects.featured')}</p>
+        <p class="feature__summary">{featured.summary[lang]}</p>
+        <ul class="feature__points">
+          {featured.highlights[lang].slice(0, 3).map((h) => <li>{h}</li>)}
+        </ul>
+        <p class="stack">
+          <span class="visually-hidden">{t('projects.stack')}: </span>
+          {featured.stack.map((s) => <span>{s}</span>)}
+        </p>
+        <a class="btn btn--brass" href={routes.project(lang, featured.slug)}>
+          {t('projects.viewCase')}
+          <span class="visually-hidden">: {featured.name}</span>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m0 0-5-5m5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </a>
+      </div>
+    </article>
+
+    {
+      groups.map((g) => (
+        <div class="group" aria-labelledby={`group-${g.id}`}>
+          <h3 id={`group-${g.id}`} class="group__title">{g.title}</h3>
+          <ul class="group__list">
+            {g.items.map((p) => (
+              <li>
+                <ProjectItem project={p} lang={lang} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: center;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    margin-inline: calc(-1 * clamp(0rem, 2vw, 2rem));
+    border-radius: 22px;
+    background: linear-gradient(160deg, rgb(47 37 31 / 0.9), rgb(29 23 19 / 0.9));
+    box-shadow:
+      inset 0 1px 0 rgb(243 221 176 / 0.08),
+      0 50px 90px -50px rgb(0 0 0 / 0.9);
+  }
+  .feature__tag {
+    margin-top: var(--space-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--hoja);
+    font-weight: 600;
+  }
+  .feature__tag::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px rgb(125 154 90 / 0.18);
+  }
+  .feature__title {
+    font-size: var(--step-3);
+    font-variation-settings: 'wdth' 85;
+  }
+  .feature__summary {
+    margin-top: var(--space-s);
+    font-size: var(--step-1);
+    line-height: 1.45;
+    color: var(--papel-suave);
+  }
+  .feature__points {
+    display: grid;
+    gap: 0.6rem;
+    margin: var(--space-m) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .feature__points li {
+    position: relative;
+    padding-left: 1.4rem;
+  }
+  .feature__points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.7rem;
+    height: 1px;
+    background: var(--laton);
+  }
+  .feature .stack {
+    margin-block: var(--space-m) var(--space-l);
+  }
+
+  .group {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: var(--space-l);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--grafito-borde);
+  }
+  .group + .group {
+    margin-top: var(--space-xl);
+  }
+  .group__title {
+    font-size: var(--step-2);
+    font-weight: 500;
+    color: var(--laton-claro);
+  }
+  .group__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl) var(--space-l);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 60rem) {
+    .feature {
+      grid-template-columns: 1fr;
+      margin-inline: 0;
+    }
+    .group {
+      grid-template-columns: 1fr;
+      gap: var(--space-m);
+    }
+  }
+  @media (max-width: 40rem) {
+    .group__list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  :global(.stack) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    color: var(--papel-suave);
+    font-size: var(--step--1);
+  }
+  :global(.stack > span:not(.visually-hidden)) {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--grafito-borde);
+    border-radius: 999px;
+    background: rgb(23 21 19 / 0.5);
+  }
+</style>

@@ -1,0 +1,191 @@
+---
+import { siWhatsapp, siInstagram } from 'simple-icons';
+import { useT, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const t = useT(Astro.props.lang);
+const email = 'ndiazruiz10@gmail.com';
+const channels = [
+  { label: t('contact.whatsapp'), handle: '+34 624 091 057', href: 'https://wa.me/34624091057', icon: siWhatsapp.path },
+  { label: t('contact.igPro'), handle: '@bynicodev', href: 'https://instagram.com/bynicodev', icon: siInstagram.path },
+  { label: t('contact.igPersonal'), handle: '@diaz___nico', href: 'https://instagram.com/diaz___nico', icon: siInstagram.path },
+];
+---
+
+<section id="contacto" class="section contact" aria-labelledby="contact-title">
+  <div class="wrap">
+    <h2 id="contact-title" class="contact__title">{t('contact.title')}</h2>
+    <p class="contact__lead">{t('contact.lead')}</p>
+
+    <div class="mail">
+      <a class="mail__link" href={`mailto:${email}`}>
+        <span class="visually-hidden">{t('contact.mail')}: </span>{email}
+      </a>
+      <button
+        class="btn btn--ghost mail__copy"
+        type="button"
+        data-copy={email}
+        data-label={t('contact.copy')}
+        data-done={t('contact.copied')}
+      >
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="7" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.6"></rect><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7" stroke="currentColor" stroke-width="1.6"></path></svg>
+        <span class="mail__copy-text" aria-live="polite">{t('contact.copy')}</span>
+      </button>
+    </div>
+
+    <ul class="channels">
+      {
+        channels.map((c) => (
+          <li>
+            <a class="channel" href={c.href} target="_blank" rel="noopener">
+              <svg class="channel__icon" viewBox="0 0 24 24" aria-hidden="true"><path d={c.icon} fill="currentColor" /></svg>
+              <span class="channel__label">{c.label}</span>
+              <span class="channel__handle">{c.handle}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding-bottom: var(--space-2xl);
+  }
+  .contact__title {
+    font-size: var(--step-4);
+    font-weight: 640;
+    letter-spacing: -0.008em;
+    font-variation-settings: 'wdth' 84;
+  }
+  .contact__lead {
+    margin-top: var(--space-m);
+    max-width: 38rem;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--papel-suave);
+  }
+
+  .mail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    margin-top: var(--space-xl);
+  }
+  .mail__link {
+    font-size: clamp(1.4rem, 0.6rem + 3.6vw, 3.4rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--luz);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+    overflow-wrap: anywhere;
+    transition: color 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mail__link:hover {
+      color: var(--laton-claro);
+    }
+  }
+  .mail__copy-text {
+    display: inline-block;
+    transition: filter 200ms ease, opacity 200ms ease;
+  }
+  .mail__copy.is-swapping .mail__copy-text {
+    filter: blur(2px);
+    opacity: 0.6;
+  }
+
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: var(--space-xl) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--grafito-borde);
+  }
+  .channels li + li .channel {
+    border-left: 1px solid var(--grafito-borde);
+  }
+  .channel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.15rem 0.9rem;
+    align-items: center;
+    padding: var(--space-m);
+    text-decoration: none;
+    transition: background-color 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .channel:hover {
+      background: rgb(243 221 176 / 0.05);
+    }
+    .channel:hover .channel__icon {
+      color: var(--laton-claro);
+    }
+  }
+  .channel__icon {
+    grid-row: span 2;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--papel-suave);
+    transition: color 200ms ease;
+  }
+  .channel__label {
+    color: var(--papel-tenue);
+    font-size: var(--step--1);
+  }
+  .channel__handle {
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+
+  @media (max-width: 52rem) {
+    .channels {
+      grid-template-columns: 1fr;
+    }
+    .channels li + li .channel {
+      border-left: 0;
+      border-top: 1px solid var(--grafito-borde);
+    }
+    .channel {
+      padding-inline: 0;
+    }
+  }
+</style>
+
+<script>
+  function bindCopy() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = 'true';
+      const text = btn.querySelector<HTMLElement>('.mail__copy-text');
+      let timer: number | undefined;
+      const swap = (label: string) => {
+        if (!text) return;
+        btn.classList.add('is-swapping');
+        setTimeout(() => {
+          text.textContent = label;
+          btn.classList.remove('is-swapping');
+        }, 120);
+      };
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+          swap(btn.dataset.done ?? '');
+          clearTimeout(timer);
+          timer = window.setTimeout(() => swap(btn.dataset.label ?? ''), 2200);
+        } catch {
+          window.location.href = `mailto:${btn.dataset.copy}`;
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', bindCopy);
+</script>
